@@ -1,3 +1,11 @@
+# Ajedrez, v2.
+
+# Carolina Cordero
+
+# Piezas implementadas con todos sus movimientos y comiendo:
+# Peón
+# Caballo
+
 module Globales
   # Letras del abecedario, se utilizarán para asignar a cada escaque su identificación
   # según el sistema de notación algebraica que se utiliza en el ajedrez:
@@ -74,62 +82,93 @@ class Caballo < Pieza
   def calcular_movimientos_posibles(tablero)
     movimientos_posibles = Array.new
 
-    # Hacia adelante en forma de L:
-    fila_destino = (tablero.color_que_juega == Color::BLANCO ? @fila + 1 : @fila - 1)
-    # Si el movimiento es dentro de las dimensiones del tablero:
-    if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS) 
-      # Si escaque destino está vacío:
-      if tablero.get_escaque(fila_destino, @columna).pieza.nil?
-        # Escaque destino se agrega a movimientos disponibles:
-        # Come = false
-        # Movimiento = avanza
-        movimientos_posibles.push([tablero.get_escaque(fila_destino, @columna), false, "avanza", fila_destino, @columna])
-        @puede_mover = true
-      end
+    # Movimiento en forma de L:
 
-      # Si puede comer con un movimiento diagonal una casilla hacia adelante:
-      [-1, 1].each { |suma_columna| 
+    [-2, 2].each { |mueve_dos| 
+      [-1, 1].each { |mueve_uno| 
 
-        columna_destino = @columna + suma_columna
-
+        # Movimiento 1:  mueve dos filas y una columna
+        fila_destino = @fila + mueve_dos
         # Si el movimiento es dentro de las dimensiones del tablero:
-        if (columna_destino >= 1 && columna_destino <= tablero.Q_COLUMNAS)
-          # Si escaque destino está ocupado por una pieza del jugador contrario:
-          pieza_en_destino= tablero.get_escaque(fila_destino, columna_destino).pieza
-          if !(pieza_en_destino.nil?) 
-            if pieza_en_destino.color != tablero.color_que_juega
+        if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS) 
+          columna_destino = @columna + mueve_uno
+
+          # Si el movimiento es dentro de las dimensiones del tablero:
+          if (columna_destino >= 1 && columna_destino <= tablero.Q_COLUMNAS)
+
+            # Si el escaque destino está vacío, o si la pieza que lo ocupa es del jugador contrario:
+            pieza_en_destino= tablero.get_escaque(fila_destino, columna_destino).pieza
+            if (pieza_en_destino.nil? || pieza_en_destino.color != tablero.color_que_juega)
+
               # Escaque destino se agrega a movimientos disponibles:
-              # Come = true
-              # Movimiento = avanza
-              movimientos_posibles.push([tablero.get_escaque(fila_destino, columna_destino), true, "avanza", fila_destino, columna_destino])
+
+              # Se determina si con el movimiento la pieza come (se pregunta si el escaque destino está vacío):
+              come = !(tablero.get_escaque(fila_destino, columna_destino).pieza.nil?)
+              
+              # Movimiento = en función del color de la pieza:
+              movimiento = ""
+              if fila_destino > @fila
+                if tablero.color_que_juega == Color::BLANCO
+                  movimiento = "avanza"
+                else
+                  movimiento = "retrocede"
+                end
+              else
+                if tablero.color_que_juega == Color::NEGRO
+                  movimiento = "avanza"
+                else
+                  movimiento = "retrocede"
+                end
+              end
+              movimientos_posibles.push([tablero.get_escaque(fila_destino, columna_destino), come, movimiento, fila_destino, columna_destino])
               @puede_mover = true
             end
           end
         end
-      }
-    end
 
-    # Si es el primer movimiento del peón, también puede moverse dos casillas hacia adelante,
-    # siempre que ambas están vacías:
-    if es_primer_movimiento?
-      fila_destino = (tablero.color_que_juega == Color::BLANCO ? @fila + 2 : @fila - 2)
-      # Si el movimiento es dentro de las dimensiones del tablero:
-      if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS)
-        # Si escaque destino está vacío:
-        if tablero.get_escaque(fila_destino, @columna).pieza.nil?
-          # Si escaque anterior al destino está vacío:
-          if tablero.get_escaque((tablero.color_que_juega == Color::BLANCO ? fila_destino - 1 : fila_destino + 1), @columna).pieza.nil?
-            # Escaque destino se agrega a movimientos disponibles:
-            # Come = false
-            # Movimiento = avanza
-            movimientos_posibles.push([tablero.get_escaque(fila_destino, @columna), false, "avanza", fila_destino, @columna])
-            @puede_mover = true
+
+        # Movimiento 2:  mueve una fila y dos columnas
+        fila_destino = @fila + mueve_uno
+        # Si el movimiento es dentro de las dimensiones del tablero:
+        if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS) 
+          columna_destino = @columna + mueve_dos
+          # Si el movimiento es dentro de las dimensiones del tablero:
+          if (columna_destino >= 1 && columna_destino <= tablero.Q_COLUMNAS)
+
+            # Si el escaque destino está vacío, o si la pieza que lo ocupa es del jugador contrario:
+            pieza_en_destino= tablero.get_escaque(fila_destino, columna_destino).pieza
+            if (pieza_en_destino.nil? || pieza_en_destino.color != tablero.color_que_juega)
+              # Escaque destino se agrega a movimientos disponibles:
+            
+              # Se determina si con el movimiento la pieza come (se pregunta si el escaque destino está vacío):
+              come = !(tablero.get_escaque(fila_destino, columna_destino).pieza.nil?)
+
+              # Movimiento = en función del color de la pieza:
+              movimiento = ""
+              if fila_destino > @fila
+                if tablero.color_que_juega == Color::BLANCO
+                  movimiento = "avanza"
+                else
+                  movimiento = "retrocede"
+                end
+              else
+                if tablero.color_que_juega == Color::NEGRO
+                  movimiento = "avanza"
+                else
+                  movimiento = "retrocede"
+                end
+              end
+              movimientos_posibles.push([tablero.get_escaque(fila_destino, columna_destino), come, movimiento, fila_destino, columna_destino])
+              @puede_mover = true
+              end
           end
         end
-      end
-    end
+
+      } # .each mueve_uno
+    } # .each mueve_dos
 
     @movimientos_posibles = movimientos_posibles
+
   end
 end
 
