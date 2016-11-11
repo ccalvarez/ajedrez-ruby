@@ -72,6 +72,64 @@ class Caballo < Pieza
 
   # Métodos públicos de instancia
   def calcular_movimientos_posibles(tablero)
+    movimientos_posibles = Array.new
+
+    # Hacia adelante en forma de L:
+    fila_destino = (tablero.color_que_juega == Color::BLANCO ? @fila + 1 : @fila - 1)
+    # Si el movimiento es dentro de las dimensiones del tablero:
+    if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS) 
+      # Si escaque destino está vacío:
+      if tablero.get_escaque(fila_destino, @columna).pieza.nil?
+        # Escaque destino se agrega a movimientos disponibles:
+        # Come = false
+        # Movimiento = avanza
+        movimientos_posibles.push([tablero.get_escaque(fila_destino, @columna), false, "avanza", fila_destino, @columna])
+        @puede_mover = true
+      end
+
+      # Si puede comer con un movimiento diagonal una casilla hacia adelante:
+      [-1, 1].each { |suma_columna| 
+
+        columna_destino = @columna + suma_columna
+
+        # Si el movimiento es dentro de las dimensiones del tablero:
+        if (columna_destino >= 1 && columna_destino <= tablero.Q_COLUMNAS)
+          # Si escaque destino está ocupado por una pieza del jugador contrario:
+          pieza_en_destino= tablero.get_escaque(fila_destino, columna_destino).pieza
+          if !(pieza_en_destino.nil?) 
+            if pieza_en_destino.color != tablero.color_que_juega
+              # Escaque destino se agrega a movimientos disponibles:
+              # Come = true
+              # Movimiento = avanza
+              movimientos_posibles.push([tablero.get_escaque(fila_destino, columna_destino), true, "avanza", fila_destino, columna_destino])
+              @puede_mover = true
+            end
+          end
+        end
+      }
+    end
+
+    # Si es el primer movimiento del peón, también puede moverse dos casillas hacia adelante,
+    # siempre que ambas están vacías:
+    if es_primer_movimiento?
+      fila_destino = (tablero.color_que_juega == Color::BLANCO ? @fila + 2 : @fila - 2)
+      # Si el movimiento es dentro de las dimensiones del tablero:
+      if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS)
+        # Si escaque destino está vacío:
+        if tablero.get_escaque(fila_destino, @columna).pieza.nil?
+          # Si escaque anterior al destino está vacío:
+          if tablero.get_escaque((tablero.color_que_juega == Color::BLANCO ? fila_destino - 1 : fila_destino + 1), @columna).pieza.nil?
+            # Escaque destino se agrega a movimientos disponibles:
+            # Come = false
+            # Movimiento = avanza
+            movimientos_posibles.push([tablero.get_escaque(fila_destino, @columna), false, "avanza", fila_destino, @columna])
+            @puede_mover = true
+          end
+        end
+      end
+    end
+
+    @movimientos_posibles = movimientos_posibles
   end
 end
 
@@ -103,6 +161,7 @@ class Dama < Pieza
 
   # Métodos públicos de instancia
   def calcular_movimientos_posibles(tablero)
+
   end
 
 end
@@ -386,8 +445,6 @@ class Tablero
     # Se crea esta función para obtener la lista de los escaques que contienen las piezas que el jugador puede mover.
     # El jugador (Blancas o Negras) se determina a partir del número de jugada
 
-    #color_que_juega = (jugada.odd? ? Color::BLANCO : Color::NEGRO)
-
     arreglo_escaques = Array.new
 
     @escaques.each { |fila_array| 
@@ -441,7 +498,6 @@ end
 
 # Se instancia el tablero, iniciando una partida:
 tablero = Tablero.new
-
 
 salir = "N"
 pieza_a_mover = ""
