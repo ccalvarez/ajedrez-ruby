@@ -1,4 +1,5 @@
-# Ajedrez, v3.
+# Ajedrez, v4.
+# 13/11/2016
 
 # Carolina Cordero
 
@@ -6,6 +7,7 @@
 # Peón
 # Caballo
 # Rey
+# Torre
 
 module Globales
   # Letras del abecedario, se utilizarán para asignar a cada escaque su identificación
@@ -65,7 +67,153 @@ class Torre < Pieza
   end
 
   # Métodos públicos de instancia
+
+  # Comportamiento
   def calcular_movimientos_posibles(tablero)
+    movimientos_posibles = Array.new
+
+    # Direcciones ortogonales, n casillas 
+
+    # Los movimientos se harán en una sola dirección a la vez, para poder hacer un break cuando
+    # se detecta que la pieza está siendo bloqueada y por lo tanto no puede avanzar más alla 
+    # del escaque donde encuentra otra pieza:
+
+    # Movimiento hacia la izquierda:
+    (1..(@fila - 1)).each { |suma_fila| 
+      fila_destino = @fila + -(suma_fila)
+      # Si el movimiento es dentro de las dimensiones del tablero:
+      if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS)
+        # Si el escaque destino está vacío, o si la pieza que lo ocupa es del jugador contrario:
+        pieza_en_destino= tablero.get_escaque(fila_destino, @columna).pieza
+        if (pieza_en_destino.nil? || pieza_en_destino.color != tablero.color_que_juega)
+          # Escaque destino se agrega a movimientos disponibles:
+          # Se determina si con el movimiento la pieza come (se pregunta si el escaque destino está vacío):
+          come = !(tablero.get_escaque(fila_destino, @columna).pieza.nil?)
+          
+          # Movimiento = en función del color de la pieza:
+          movimiento = ""
+          if fila_destino >= @fila
+            if tablero.color_que_juega == Color::BLANCO
+              movimiento = "avanza"
+            else
+              movimiento = "retrocede"
+            end
+          else
+            if tablero.color_que_juega == Color::NEGRO
+              movimiento = "avanza"
+            else
+              movimiento = "retrocede"
+            end
+          end
+          movimientos_posibles.push([tablero.get_escaque(fila_destino, @columna), come, movimiento, fila_destino, @columna])
+          @puede_mover = true
+          if come == true
+            break
+          end
+        elsif (!(pieza_en_destino.nil?) && pieza_en_destino.color == tablero.color_que_juega)
+          break
+        end
+      else
+        break
+      end
+    }
+
+    # Movimiento hacia la derecha:
+    (1..(tablero.Q_FILAS - @fila)).each { |suma_fila| 
+      fila_destino = @fila + suma_fila
+      # Si el movimiento es dentro de las dimensiones del tablero:
+      if (fila_destino >= 1 && fila_destino <= tablero.Q_FILAS)
+        # Si el escaque destino está vacío, o si la pieza que lo ocupa es del jugador contrario:
+        pieza_en_destino= tablero.get_escaque(fila_destino, @columna).pieza
+        if (pieza_en_destino.nil? || pieza_en_destino.color != tablero.color_que_juega)
+          # Escaque destino se agrega a movimientos disponibles:
+          # Se determina si con el movimiento la pieza come (se pregunta si el escaque destino está vacío):
+          come = !(tablero.get_escaque(fila_destino, @columna).pieza.nil?)
+          
+          # Movimiento = en función del color de la pieza:
+          movimiento = ""
+          if fila_destino >= @fila
+            if tablero.color_que_juega == Color::BLANCO
+              movimiento = "avanza"
+            else
+              movimiento = "retrocede"
+            end
+          else
+            if tablero.color_que_juega == Color::NEGRO
+              movimiento = "avanza"
+            else
+              movimiento = "retrocede"
+            end
+          end
+          movimientos_posibles.push([tablero.get_escaque(fila_destino, @columna), come, movimiento, fila_destino, @columna])
+          @puede_mover = true
+          if come == true
+            break
+          end
+        elsif (!(pieza_en_destino.nil?) && pieza_en_destino.color == tablero.color_que_juega)
+          break
+        end
+      else
+        break
+      end
+    }
+
+    # Movimiento hacia la arriba:
+    (1..(@columna - 1)).each { |suma_columna| 
+      columna_destino = @columna + -(suma_columna)
+      # Si el movimiento es dentro de las dimensiones del tablero:
+      if (columna_destino >= 1 && columna_destino <= tablero.Q_COLUMNAS)
+        # Si el escaque destino está vacío, o si la pieza que lo ocupa es del jugador contrario:
+        pieza_en_destino= tablero.get_escaque(@fila, columna_destino).pieza
+        if (pieza_en_destino.nil? || pieza_en_destino.color != tablero.color_que_juega)
+          # Escaque destino se agrega a movimientos disponibles:
+          # Se determina si con el movimiento la pieza come (se pregunta si el escaque destino está vacío):
+          come = !(tablero.get_escaque(@fila, columna_destino).pieza.nil?)
+          
+          movimiento = "avanza"
+          
+          movimientos_posibles.push([tablero.get_escaque(@fila, columna_destino), come, movimiento, @fila, columna_destino])
+          @puede_mover = true
+          if come == true
+            break
+          end
+        elsif (!(pieza_en_destino.nil?) && pieza_en_destino.color == tablero.color_que_juega)
+          break
+        end
+      else
+        break
+      end
+    }
+
+    # Movimiento hacia abajo:
+    (1..(tablero.Q_COLUMNAS - @columna)).each { |suma_columna| 
+      columna_destino = @columna + suma_columna
+      # Si el movimiento es dentro de las dimensiones del tablero:
+      if (columna_destino >= 1 && columna_destino <= tablero.Q_COLUMNAS)
+        # Si el escaque destino está vacío, o si la pieza que lo ocupa es del jugador contrario:
+        pieza_en_destino= tablero.get_escaque(@fila, columna_destino).pieza
+        if (pieza_en_destino.nil? || pieza_en_destino.color != tablero.color_que_juega)
+          # Escaque destino se agrega a movimientos disponibles:
+          # Se determina si con el movimiento la pieza come (se pregunta si el escaque destino está vacío):
+          come = !(tablero.get_escaque(@fila, columna_destino).pieza.nil?)
+          
+          movimiento = "avanza"
+          
+          movimientos_posibles.push([tablero.get_escaque(@fila, columna_destino), come, movimiento, @fila, columna_destino])
+          @puede_mover = true
+          if come == true
+            break
+          end
+        elsif (!(pieza_en_destino.nil?) && pieza_en_destino.color == tablero.color_que_juega)
+          break
+        end
+      else
+        break
+      end
+    }
+
+
+    @movimientos_posibles = movimientos_posibles
   end
 end
 
@@ -200,8 +348,15 @@ class Dama < Pieza
   end
 
   # Métodos públicos de instancia
-  def calcular_movimientos_posibles(tablero)
 
+  # Comportamiento
+  def calcular_movimientos_posibles(tablero)
+    movimientos_posibles = Array.new
+    
+    # En todas las direcciones, n escaques a la vez, mientras no esté bloqueada:
+
+    
+    @movimientos_posibles = movimientos_posibles
   end
 
 end
